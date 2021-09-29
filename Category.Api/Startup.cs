@@ -1,3 +1,7 @@
+using Application.Common.Behaviors;
+using FluentValidation;
+using IoC;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -10,6 +14,7 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Category.Api
@@ -26,12 +31,17 @@ namespace Category.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Category.Api", Version = "v1" });
             });
+
+            services.AddMediatR(Assembly.Load("Application"));
+            services.AddRepositories(Configuration);
+
+            services.AddValidatorsFromAssembly(Assembly.Load("Application"));
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
